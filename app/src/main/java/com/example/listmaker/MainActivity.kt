@@ -1,5 +1,6 @@
 package com.example.listmaker
 
+import android.content.Intent
 import android.os.Bundle
 import android.text.InputType
 import android.view.Menu
@@ -12,16 +13,19 @@ import androidx.recyclerview.widget.RecyclerView
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.content_main.*
 
-class MainActivity : AppCompatActivity() {
+class MainActivity : AppCompatActivity(), TodoListAdapter.ITodoListClickListener {
     lateinit var todoList: RecyclerView
     lateinit var todoListAdapter: TodoListAdapter
+    val listDataManager = ListDataManager(this)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         setSupportActionBar(toolbar)
+
+        val taskLists = listDataManager.readTaskLists()
         todoList = findViewById(R.id.todolists_recyclerview)
         todoList.layoutManager = LinearLayoutManager(this)
-        todoList.adapter = TodoListAdapter()
+        todoList.adapter = TodoListAdapter(taskLists, this)
 
         fab.setOnClickListener { _ ->
             todoListAdapter = todolists_recyclerview.adapter as TodoListAdapter
@@ -56,15 +60,43 @@ class MainActivity : AppCompatActivity() {
         dialog.setView(editTextTodoTitle)
         dialog.setPositiveButton(positiveButtonTitle) { dialog, _ ->
             val userInput = editTextTodoTitle.text.toString()
-            updateList(userInput)
+            val taskList = TaskList(title = userInput)
+
+            storeValueInSharedPrefs(taskList)
+
+            updateList(taskList)
+
             dialog.dismiss()
+
+            openTaskList(taskList)
         }
         dialog.create().show()
 
     }
 
-    private fun updateList(newListItem:String) {
+    private fun updateList(taskList:TaskList) {
         if (::todoListAdapter.isInitialized)
-            todoListAdapter.addItem(newListItem)
+            todoListAdapter.addList(taskList)
+
+    }
+
+    private fun storeValueInSharedPrefs(taskList:TaskList) {
+            listDataManager.saveTaskList(taskList)
+    }
+
+    private fun openTaskList(tasks:TaskList) {
+        val taskList = Intent(this,DetailActivity::class.java)
+        taskList.putExtra(INTENT_LIST_KEY,tasks)
+        startActivity(taskList)
+    }
+
+    companion object {
+        const val INTENT_LIST_KEY = "list"
+    }
+
+    override fun onTodoItemClicked(taskList: TaskList) {
+        openTaskList(taskList)
     }
 }
+
+
