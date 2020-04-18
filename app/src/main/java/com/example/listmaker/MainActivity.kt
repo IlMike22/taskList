@@ -33,6 +33,21 @@ class MainActivity : AppCompatActivity(), TodoListAdapter.ITodoListClickListener
         }
     }
 
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        if (requestCode == LIST_DETAIL_REQUEST_CODE) {
+            data?.apply {
+                val tasks = getParcelableExtra<TaskList>(INTENT_LIST_KEY)
+                listDataManager.saveTaskList(tasks)
+                updateLists()
+            }
+        }
+    }
+
+    private fun updateLists() {
+        val taskLists = listDataManager.readTaskLists()
+        todolists_recyclerview.adapter = TodoListAdapter(taskLists, this)
+    }
+
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         // Inflate the menu; this adds items to the action bar if it is present.
         menuInflater.inflate(R.menu.menu_main, menu)
@@ -87,11 +102,12 @@ class MainActivity : AppCompatActivity(), TodoListAdapter.ITodoListClickListener
     private fun openTaskList(tasks:TaskList) {
         val taskList = Intent(this,DetailActivity::class.java)
         taskList.putExtra(INTENT_LIST_KEY,tasks)
-        startActivity(taskList)
+        startActivityForResult(taskList, LIST_DETAIL_REQUEST_CODE)
     }
 
     companion object {
         const val INTENT_LIST_KEY = "list"
+        const val LIST_DETAIL_REQUEST_CODE = 22
     }
 
     override fun onTodoItemClicked(taskList: TaskList) {
