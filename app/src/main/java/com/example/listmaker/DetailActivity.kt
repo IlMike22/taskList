@@ -37,7 +37,7 @@ class DetailActivity : AppCompatActivity() {
 
     override fun onBackPressed() {
         val bundle = Bundle()
-        bundle.putParcelable(MainActivity.INTENT_LIST_KEY, taskList)
+        bundle.putParcelable(INTENT_LIST_KEY, taskList)
         val intent = Intent()
         intent.putExtras(bundle)
         setResult(Activity.RESULT_OK, intent)
