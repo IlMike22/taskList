@@ -10,6 +10,9 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.EditText
 import androidx.appcompat.app.AlertDialog
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.ViewModelProviders
+import androidx.navigation.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import kotlinx.android.synthetic.main.content_main.*
@@ -41,6 +44,10 @@ class ToDoListFragment : Fragment(), TodoListAdapter.ITodoListClickListener{
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        activity?.apply {
+            listDataManager = ViewModelProviders.of(this).get(ListDataManager::class.java)
+        }
+
 
         taskLists = listDataManager.readTaskLists()
         todoListRecyclerView = view.findViewById(R.id.todolists_recyclerview)
@@ -65,6 +72,7 @@ class ToDoListFragment : Fragment(), TodoListAdapter.ITodoListClickListener{
     }
 
     override fun onTodoItemClicked(taskList: TaskList) {
+        openTaskList(taskList)
     }
 
     fun addList(taskList:TaskList) {
@@ -119,7 +127,10 @@ class ToDoListFragment : Fragment(), TodoListAdapter.ITodoListClickListener{
     }
 
     private fun openTaskList(tasks:TaskList) {
-
+        view?.apply {
+            val action = ToDoListFragmentDirections.actionToDoListFragmentToTaskDetailFragment(tasks.title)
+            findNavController().navigate(action)
+        }
     }
 
 
